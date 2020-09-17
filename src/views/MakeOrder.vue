@@ -32,6 +32,7 @@
           <div class="content__price">
             <div v-html="`${price.toFixed(2)} грн`" class="number"> грн</div>
             <div class="time">
+              {{executionTime}}
             </div>
           </div>
           <div class="button">
@@ -100,35 +101,19 @@
         this.setTime(length)
       },
       setTime(length) {
-        const date = new Date()
-        let hour = date.getHours() + 1
-        let minute = date.getUTCMinutes()
-        let day = date.getUTCDate()
-        let month = date.getUTCMonth() + 1
-        let year = date.getFullYear()
-
-        let iterationCount
-
-        this.langType === 'slav' ? iterationCount = length / 666.5 : iterationCount = length / 166.5
-
-        if (hour >= 19) {
-          hour = 10
-          day += 1
-        }
-
+        const iterationCount = this.langType === 'slav' ? length / 666.5 : length / 166.5
+        let time = this.$moment()
+        time.add(1, 'hour')
         for (let i = 0; i < iterationCount.toFixed(0); i++) {
-          if (hour >= 19) {
-            hour = 10
-            day += 1
-          }
-          minute += 30
-          if (minute >= 60) {
-            minute = 0
-            hour += 1
+          time.add(30, 'minute')
+          if (time.hour() >= 19) {
+            time.set({
+              hour: 10,
+              date: time.date() + 1
+            })
           }
         }
-
-        console.log(new Intl.DateTimeFormat('ua-UA', this.option).format(new Date(year, month, day, hour, minute)))
+        this.executionTime = `Здамо ${time.calendar().toLowerCase()}`
       }
     },
     components: {
