@@ -31,8 +31,7 @@
         <div class="submit__content">
           <div class="content__price">
             <div v-html="`${price.toFixed(2)} грн`" class="number"> грн</div>
-            <div class="time">
-              {{executionTime}}
+            <div v-html="executionTime" class="time">
             </div>
           </div>
           <div class="button">
@@ -48,6 +47,9 @@
 
   import Fields from "../components/MakeOrder/Fields";
   import SelectLang from  "../components/MakeOrder/SelectLang"
+  import moment from 'moment'
+
+
 
   export default {
     name: "MakeOrder",
@@ -59,13 +61,6 @@
       executionTime:'',
       text: '',
       fileTextLength: 0,
-      option: {
-        day: '2-digit',
-        month:'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      }
     }),
     methods: {
       select(langType, coef) {
@@ -98,22 +93,29 @@
         else {
           this.langType === 'slav' ? this.price = 50 : this.price = 120
         }
-        this.setTime(length)
+        this.setTime(length, moment())
       },
-      setTime(length) {
+      setTime(length, m) {
         const iterationCount = this.langType === 'slav' ? length / 666.5 : length / 166.5
-        let time = this.$moment()
-        time.add(1, 'hour')
-        for (let i = 0; i < iterationCount.toFixed(0); i++) {
+        let time = m.clone()
+        time.set({hour: time.hour() + 1, minute: 0})
+        if (time.hour() >= 19) time.set({hour: 10, date: time.date() + 1})
+        if (time.day() === 6) time.add(2, 'day')
+        if (time.day() === 0) time.add(1, 'day')
+        for (let i = 0; i < iterationCount; i++) {
           time.add(30, 'minute')
-          if (time.hour() >= 19) {
-            time.set({
-              hour: 10,
-              date: time.date() + 1
-            })
-          }
+          if (time.hour() >= 19) {time.set({hour: 10, date: time.date() + 1, minute: 0})}
+          if (time.day() === 6) time.add(2, 'day')
         }
-        this.executionTime = `Здамо ${time.calendar().toLowerCase()}`
+        if (time.hour() === m.hour() + 1 && time.date() === m.date()) {
+          this.executionTime = `Здамо за: одну годину`
+        } else if (time.hour() === m.hour() + 2 && time.date() === m.date()) {
+          this.executionTime = `Здамо за: дві години`
+        } else if (time.hour() === m.hour() + 3 && time.date() === m.date()) {
+          this.executionTime = `Здамо за: три години`
+        } else {
+          this.executionTime = `Термін виконання: ${time.format('L')} о ${time.format('LT')}`
+        }
       }
     },
     components: {

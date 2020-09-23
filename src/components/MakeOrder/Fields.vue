@@ -6,7 +6,7 @@
               <span class="no-wrap">не переписуватимемо.</span>
               Зайвих виправлень не буде.
             </span>
-      <router-link to="/ua/price/proofreading">
+      <router-link to="#">
         Детальніше про редагування
       </router-link>
     </p>
